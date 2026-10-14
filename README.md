@@ -8,6 +8,8 @@ English summary: Python scripts and JSON parameters for UE 5.8 that convert Meta
 retarget Mixamo / UE Mannequin body animation (with the "Run IK Rig" op disabled, which otherwise flips knees and elbows),
 and tune hair/skirt spring bones, foot sinking and hand penetration through JSON files. License: CC0.
 
+詳しい使い方は、[日本語マニュアル](docs/MANUAL_ja.md)（手順ごとの画面つき）を見てください。
+
 ## 含まれるもの
 
 | 区分 | ファイル | 内容 |
