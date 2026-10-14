@@ -1,0 +1,16 @@
+{
+  "_about": "足の沈みと手の貫通の補正（2ボーン IK）。距離の単位は cm。per_anim で動きごとに上書きできる。",
+  "foot_ik": true,
+  "hand_push": true,
+  "sink_tolerance_cm": 0.3,
+  "torso_radius_cm": 11.0,
+  "thigh_radius_cm": 8.0,
+  "head_radius_cm": 10.0,
+  "hand_margin_cm": 3.0,
+  "penetration_tolerance_cm": 0.3,
+  "smooth_frames": 3,
+  "strength": 1.0,
+  "per_anim": {
+    "_example_gangnam_style": {"strength": 0.8, "hand_margin_cm": 2.0}
+  }
+}

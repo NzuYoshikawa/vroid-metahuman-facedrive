@@ -1,0 +1,13 @@
+{
+ "_about": "プロジェクト固有の名前。VRM4U が取り込み時に付ける名前（SK_<モデル名> など）と、MetaHuman の Performance のパスを書く。",
+ "vroid_dir": "/Game/Characters/V4U/",
+ "mesh": "SK_v4u_1130",
+ "skeleton": "SKEL_v4u_1130",
+ "meta": "VM_v4u_1130_VrmMeta",
+ "retargeter": "RTG_v4u_1130",
+ "ik_rig_mannequin": "IK_v4u_1130_Mannequin",
+ "face_pose_anim": "A_face_v4u_1130",
+ "mh_face_skeleton": "/Game/MetaHumans/Common/Face/Face_Archetype_Skeleton",
+ "performance": "/Game/MetaHumans/<キャラ名>/MHA/<Performanceアセット名>",
+ "mixamo_dir": "C:\\Mixamo"
+}

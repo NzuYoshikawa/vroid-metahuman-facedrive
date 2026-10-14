@@ -1,0 +1,260 @@
+{
+ "_about": "v2: v1 から ①口ごと位置が動く Fcl_MTH_Up/Down を外す ②口の開きの利得を上げる ③まばたきを待機時の下駄を引いて0..1に広げる。VRoid標準名なので別のVRoidモデルにも使える。",
+ "auto_norm": [
+  "eyeBlinkL",
+  "eyeBlinkR",
+  "eyeWidenL",
+  "eyeWidenR"
+ ],
+ "targets": {
+  "Fcl_MTH_Close": {
+   "terms": [
+    [
+     "avg(mouthLipsTogetherDL,mouthLipsTogetherDR,mouthLipsTogetherUL,mouthLipsTogetherUR)",
+     1.0
+    ]
+   ]
+  },
+  "Fcl_MTH_Fun": {
+   "terms": [
+    [
+     "avg(mouthCornerPullL,mouthCornerPullR)",
+     1.3
+    ]
+   ],
+   "gate": [
+    [
+     "jawOpen",
+     "inv",
+     1.0
+    ]
+   ]
+  },
+  "Fcl_MTH_Joy": {
+   "terms": [
+    [
+     "avg(mouthCornerPullL,mouthCornerPullR)",
+     1.3
+    ]
+   ],
+   "gate": [
+    [
+     "jawOpen",
+     "direct",
+     1.0
+    ]
+   ]
+  },
+  "Fcl_MTH_Sorrow": {
+   "terms": [
+    [
+     "avg(mouthCornerDepressL,mouthCornerDepressR)",
+     1.2
+    ]
+   ]
+  },
+  "Fcl_MTH_Small": {
+   "terms": [
+    [
+     "avg(mouthLipsPurseDL,mouthLipsPurseDR)",
+     0.5
+    ]
+   ]
+  },
+  "Fcl_EYE_Close_L": {
+   "terms": [
+    [
+     "eyeBlinkL",
+     1.0
+    ]
+   ]
+  },
+  "Fcl_EYE_Close_R": {
+   "terms": [
+    [
+     "eyeBlinkR",
+     1.0
+    ]
+   ]
+  },
+  "Fcl_EYE_Joy_L": {
+   "terms": [
+    [
+     "eyeCheekRaiseL",
+     0.9
+    ],
+    [
+     "mouthCornerPullL",
+     0.3
+    ]
+   ]
+  },
+  "Fcl_EYE_Joy_R": {
+   "terms": [
+    [
+     "eyeCheekRaiseR",
+     0.9
+    ],
+    [
+     "mouthCornerPullR",
+     0.3
+    ]
+   ]
+  },
+  "Fcl_EYE_Surprised": {
+   "terms": [
+    [
+     "avg(eyeWidenL,eyeWidenR)",
+     0.8
+    ]
+   ]
+  },
+  "Fcl_EYE_Angry": {
+   "terms": [
+    [
+     "avg(browDownL,browDownR)",
+     0.8
+    ]
+   ]
+  },
+  "Fcl_BRW_Angry": {
+   "terms": [
+    [
+     "avg(browDownL,browDownR)",
+     1.4
+    ]
+   ]
+  },
+  "Fcl_BRW_Sorrow": {
+   "terms": [
+    [
+     "avg(browRaiseInL,browRaiseInR)",
+     1.4
+    ]
+   ]
+  },
+  "Fcl_BRW_Surprised": {
+   "terms": [
+    [
+     "avg(browRaiseOuterL,browRaiseOuterR)",
+     0.8
+    ],
+    [
+     "avg(browRaiseInL,browRaiseInR)",
+     0.6
+    ]
+   ]
+  },
+  "Fcl_BRW_Joy": {
+   "terms": [
+    [
+     "avg(browRaiseOuterL,browRaiseOuterR)",
+     0.8
+    ]
+   ]
+  }
+ },
+ "deliberately_unmapped": [
+  "Fcl_ALL_*",
+  "Fcl_EYE_Close",
+  "Fcl_EYE_Joy",
+  "Fcl_EYE_Natural",
+  "Fcl_EYE_Iris_Hide",
+  "Fcl_EYE_Highlight_Hide",
+  "Fcl_HA_*",
+  "Fcl_MTH_SkinFung*",
+  "Fcl_MTH_Angry",
+  "Fcl_MTH_Surprised",
+  "Fcl_MTH_Large",
+  "Fcl_MTH_Neutral",
+  "Fcl_MTH_Up",
+  "Fcl_MTH_Down",
+  "Fcl_BRW_Fun",
+  "Fcl_EYE_Fun",
+  "Fcl_EYE_Sorrow",
+  "Fcl_EYE_Spread"
+ ],
+ "head": {
+  "_note": "MetaHumanの HeadYaw/Pitch/Roll の名前と見た目の動きが一致しない。撮影映像の動きとの相関から、HeadYaw=うなずき(+で下向き)、HeadRoll=左右の向き(+で画面右)と推定。HeadPitchは未確定のため使わない。",
+  "nod_down_deg_from": "HeadYaw",
+  "turn_right_deg_from": "HeadRoll"
+ },
+ "visemes": {
+  "aperture": [
+   [
+    "jawOpen",
+    2.4
+   ],
+   [
+    "jawOpenExtreme",
+    0.6
+   ],
+   [
+    "avg(mouthStretchL,mouthStretchR)",
+    0.8
+   ],
+   [
+    "avg(mouthFunnelDL,mouthFunnelDR,mouthFunnelUL,mouthFunnelUR)",
+    0.8
+   ],
+   [
+    "avg(mouthLipsPurseDL,mouthLipsPurseDR,mouthLipsPurseUL,mouthLipsPurseUR)",
+    0.8
+   ]
+  ],
+  "scores": {
+   "Fcl_MTH_A": [
+    [
+     "jawOpen",
+     1.0
+    ],
+    [
+     "avg(mouthLowerLipDepressL,mouthLowerLipDepressR)",
+     0.5
+    ]
+   ],
+   "Fcl_MTH_I": [
+    [
+     "avg(mouthStretchL,mouthStretchR)",
+     1.0
+    ],
+    [
+     "avg(mouthCornerWideL,mouthCornerWideR)",
+     0.5
+    ]
+   ],
+   "Fcl_MTH_U": [
+    [
+     "avg(mouthLipsPurseDL,mouthLipsPurseDR,mouthLipsPurseUL,mouthLipsPurseUR)",
+     1.0
+    ],
+    [
+     "avg(mouthFunnelDL,mouthFunnelDR,mouthFunnelUL,mouthFunnelUR)",
+     0.5
+    ]
+   ],
+   "Fcl_MTH_E": [
+    [
+     "avg(mouthStretchL,mouthStretchR)",
+     0.5
+    ],
+    [
+     "jawOpen",
+     0.5
+    ]
+   ],
+   "Fcl_MTH_O": [
+    [
+     "avg(mouthFunnelDL,mouthFunnelDR,mouthFunnelUL,mouthFunnelUR)",
+     1.0
+    ],
+    [
+     "jawOpen",
+     0.4
+    ]
+   ]
+  },
+  "power": 2.0,
+  "floor": 0.0001
+ }
+}

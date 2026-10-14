@@ -1,0 +1,15 @@
+config.json
+mh_curves.json
+vrm_curves.json
+mh_controls.json
+vrm_morphs.json
+spring_params_original.json
+spring_collider_original.json
+*.log
+__pycache__/
+render_*/
+body_retarget/
+*.mp4
+*.uasset
+*.fbx
+*.vrm

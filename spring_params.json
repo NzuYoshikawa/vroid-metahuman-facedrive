@@ -1,0 +1,15 @@
+{
+  "_about": "髪・服の揺れの調整。VRM の元の値（spring_params_original.json）に対する倍率で上書きする。1.0＝元のまま。",
+  "sway": 3.0,
+  "_sway_note": "全体の揺れやすさ。2.0＝倍揺れる（stiffness と drag を 1/2 に）、0.5＝半分。0 以下は不可。",
+  "groups": {
+    "hair":  {"match": ["Hair"],                   "sway": 1.5, "stiffness_scale": 1.0, "drag_scale": 1.0, "gravity_scale": 1.0, "hit_radius_scale": 1.0},
+    "skirt": {"match": ["Skirt", "Coat", "Cloth"], "sway": 0.3, "stiffness_scale": 1.0, "drag_scale": 1.0, "gravity_scale": 1.0, "hit_radius_scale": 2.0},
+    "other": {"match": ["*"],                      "sway": 1.0, "stiffness_scale": 1.0, "drag_scale": 1.0, "gravity_scale": 1.0, "hit_radius_scale": 1.0}
+  },
+  "overrides": [],
+  "_overrides_note": "個別の揺れ物。例: {\"match\": \"CoatSkirtBack_01\", \"sway\": 0.2, \"hit_radius_scale\": 2.5}（match は骨名の部分一致。項目は省略可）",
+  "colliders": [],
+  "_colliders_note": "体のコライダー（球）の半径。例: {\"match\": \"UpperLeg\", \"radius_scale\": 1.2}",
+  "clamp": {"stiffness": [0.0, 4.0], "drag": [0.0, 1.0], "gravity": [0.0, 10.0]}
+}

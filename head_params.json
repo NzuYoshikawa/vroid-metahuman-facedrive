@@ -1,0 +1,13 @@
+{
+  "_about": "頭の回転を骨に入れるパラメーター。MetaHumanの HeadYaw=うなずき(+で下向き)、HeadRoll=左右の向き(+でキャラの左) の推定割り当て。",
+  "enable": true,
+  "nod_gain": 1.0,
+  "turn_gain": 1.0,
+  "nod_sign": 1,
+  "turn_sign": 1,
+  "neck_share": 0.3,
+  "_neck_share_note": "回転のうち首に配る割合（0=頭だけ、0.3=首に3割）",
+  "max_deg": 25.0,
+  "mh_nod_curve": "HeadYaw",
+  "mh_turn_curve": "HeadRoll"
+}

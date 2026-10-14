@@ -1,0 +1,14 @@
+{
+  "_about": "接地補正のパラメーター。元アニメの足の高さ（床からの相対）を、VRoid の脚の長さの比で写し、足が床に沈む分だけ腰を持ち上げる。",
+  "strength": 1.0,
+  "smooth_frames": 3,
+  "smooth_frames_by_anim": {"Jog": 1},
+  "prevent_sink_only": true,
+  "sink_tolerance_cm": 0.5,
+  "float_blend": 0.0,
+  "_float_blend_note": "0=浮きは直さない。1=浮いた分も腰を下げる（脚が曲がる）。0〜1で調整",
+  "reference_idle": "MM_Idle",
+  "anims": [
+    "Idle", "Walk", "Jog", "Attack", "Charged"
+  ]
+}

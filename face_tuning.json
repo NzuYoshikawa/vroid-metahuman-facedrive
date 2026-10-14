@@ -1,0 +1,28 @@
+{
+  "_about": "顔の表情の微調整。対応表（mapping_v2.json）の結果に、表情ごとの利得・オフセット・上下限を掛ける。UE 不要で `apply_mapping.py` が読む。",
+  "expression_gain": 1.0,
+  "smooth_frames": 1,
+  "_smooth_note": "1＝平滑化なし。3＝3フレーム平均（ちらつきを抑える）",
+  "morphs": {
+    "Fcl_MTH_A":  {"gain": 1.0, "offset": 0.0, "min": 0.0, "max": 1.0},
+    "Fcl_MTH_I":  {"gain": 1.0, "offset": 0.0, "min": 0.0, "max": 1.0},
+    "Fcl_MTH_U":  {"gain": 1.0, "offset": 0.0, "min": 0.0, "max": 1.0},
+    "Fcl_MTH_E":  {"gain": 1.0, "offset": 0.0, "min": 0.0, "max": 1.0},
+    "Fcl_MTH_O":  {"gain": 1.0, "offset": 0.0, "min": 0.0, "max": 1.0},
+    "Fcl_MTH_Close":  {"gain": 1.0},
+    "Fcl_MTH_Fun":    {"gain": 1.0},
+    "Fcl_MTH_Joy":    {"gain": 1.0},
+    "Fcl_MTH_Sorrow": {"gain": 1.0},
+    "Fcl_MTH_Small":  {"gain": 1.0},
+    "Fcl_EYE_Close_L": {"gain": 1.0},
+    "Fcl_EYE_Close_R": {"gain": 1.0},
+    "Fcl_EYE_Joy_L":   {"gain": 1.0},
+    "Fcl_EYE_Joy_R":   {"gain": 1.0},
+    "Fcl_EYE_Surprised": {"gain": 1.0},
+    "Fcl_EYE_Angry":   {"gain": 1.0},
+    "Fcl_BRW_Angry":     {"gain": 1.0},
+    "Fcl_BRW_Sorrow":    {"gain": 1.0},
+    "Fcl_BRW_Surprised": {"gain": 1.0},
+    "Fcl_BRW_Joy":       {"gain": 1.0}
+  }
+}
