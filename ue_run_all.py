@@ -158,6 +158,8 @@ for name, fn, when, why in STEPS:
         traceback.print_exc()
     json.dump(report, open(os.path.join(_HERE, 'run_all_report.json'), 'w', encoding='utf-8'), ensure_ascii=False, indent=1)
 
+# 最後まで到達した印（run_all.bat が、エディタが途中で落ちたかを判断するのに使う）
+open(os.path.join(_HERE, 'run_all_done.txt'), 'w', encoding='utf-8').write(time.strftime('%Y-%m-%d %H:%M:%S'))
 ok = [k for k, v in report['steps'].items() if v['status'] == 'ok']
 ng = [k for k, v in report['steps'].items() if v['status'] == 'ng']
 print('FD SUMMARY ok=%d ng=%d skipped=%d  ng_steps=%s' % (len(ok), len(ng), len(report['steps']) - len(ok) - len(ng), ng))
