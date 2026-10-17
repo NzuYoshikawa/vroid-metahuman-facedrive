@@ -72,9 +72,13 @@ UE 5.7 は未確認です。
 1. https://github.com/NzuYoshikawa/vroid-metahuman-facedrive を開く
 2. 緑色の **Code** ボタンをクリックする
 3. **Download ZIP** をクリックする（直接のリンク: `https://github.com/NzuYoshikawa/vroid-metahuman-facedrive/archive/refs/heads/main.zip`、約 17 MB）
+
+![GitHub の Code ボタンの Download ZIP](img/a01_github_download_zip.png)
 4. `C:\FaceDrive\` フォルダを作る
 5. ZIP を右クリックして **すべて展開** を選び、展開先に `C:\FaceDrive\` を指定する
 6. `C:\FaceDriveroid-metahuman-facedrive-main\` ができる
+
+![展開したフォルダの中身](img/a02_extract.png)
 
 - UE のプロジェクトの中（`Content` や `Plugins`）には置きません。別のフォルダから UE を呼び出す形です。
 - パスに、日本語と空白を含めないでください（日本語を含むパスは未確認です）。
@@ -108,6 +112,8 @@ git clone https://github.com/NzuYoshikawa/vroid-metahuman-facedrive
 `config.example.json` を `config.json` にコピーして、書き換えます。
 方法 A で取り込んだ場合、`mesh` から `face_pose_anim` までは、自動で書き込まれます。自分で書くのは、`vrm`、`vroid_dir`、`mixamo_dir`、`performance` です。
 
+> JSON では、パスの区切り `\` を、`/` にするか、`\\` と2つ重ねて書きます（例: `"E:/Models/my.vrm"` または `"E:\\Models\\my.vrm"`）。`/` を使うと、間違えにくくなります。
+
 ![step08_config_json.png](img/step08_config_json.png)
 
 | 項目 | 意味 | 例 |
@@ -132,16 +138,29 @@ git clone https://github.com/NzuYoshikawa/vroid-metahuman-facedrive
 
 1. `settings.bat` を、メモ帳で開く
 2. `UE_DIR`（UE のフォルダ）と、`PROJECT`（`.uproject` のパス）を書いて、保存する
+
+![settings.bat の内容](img/a03_settings.png)
 3. `config.json` に、`vrm`、`vroid_dir`、（あれば）`mixamo_dir` と `performance` を書く
+
+![config.json の内容](img/a04_config.png)
 4. **`run_all.bat` をダブルクリックする**
-5. UE のエディタが開いて、全手順を順に実行し、自動で閉じる（数十分かかります）
+
+![run_all.bat の実行](img/a05_run_all.png)
+5. UE のエディタが、画面に表示されないまま裏で動き、全手順を順に実行して、自動で閉じる（モデルや動きの数によって、10〜30分）
 6. 結果は `run_all_report.json`（手順ごとの成功・失敗・飛ばした理由）と、`run_all.log` に出る
+
+![手順ごとの結果](img/a06_steps.png)
+
+エディタが途中で落ちたときは、`run_all.bat` が自動でやり直します（最大 3 回）。
+手順の途中で止まった場合は、`run_all.log` の「FD STEP」の行で、どの手順かが分かります。
 
 エディタを自分で開いて実行する場合は、メニューの **Tools** → **Execute Python Script...** で `ue_run_all.py` を選びます。
 1つの手順だけを実行する場合は、同じメニューで、その手順のスクリプトを選びます（下の 4-1 以降）。
 
 モデルを取り込んだら、先に **`check_model.bat`** をダブルクリックして、事前チェックを実行してください。
 高さ、骨の名前の対応、表情の数、揺れ物の構成を調べ、**検証済みの範囲から外れる点があれば警告**します。結果は `model_report.json` に出ます。
+
+![check_model.bat の結果](img/a07_check.png)
 
 ## 5. 手順（1つずつ実行する場合）
 
@@ -377,6 +396,8 @@ UnrealEditor.exe <プロジェクト>.uproject /Game/FaceDrive/Demo_VRoid -game 
 ## 8. 検証済みの範囲と限界
 
 **検証済みのモデル（全手順を新規プロジェクトで通しました）**
+
+![5種類のモデルの書き出し](img/a09_models.png)
 
 | モデル | 頭の骨の高さ | 揺れ物（房数／関節数） |
 |---|---|---|
