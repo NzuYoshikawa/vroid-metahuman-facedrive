@@ -71,7 +71,7 @@ UE 5.7 は未確認です。
 
 1. https://github.com/NzuYoshikawa/vroid-metahuman-facedrive を開く
 2. 緑色の **Code** ボタンをクリックする
-3. **Download ZIP** をクリックする（直接のリンク: `https://github.com/NzuYoshikawa/vroid-metahuman-facedrive/archive/refs/heads/main.zip`、約 17 MB）
+3. **Download ZIP** をクリックする（直接のリンク: `https://github.com/NzuYoshikawa/vroid-metahuman-facedrive/archive/refs/heads/main.zip`、約 16 MB）
 
 ![GitHub の Code ボタンの Download ZIP](img/a01_github_download_zip.png)
 4. `C:\FaceDrive\` フォルダを作る
