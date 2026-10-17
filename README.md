@@ -67,7 +67,7 @@ UnrealEditor-Cmd.exe <プロジェクト>.uproject -run=pythonscript -script="<�
 
 `apply_mapping.py`、`check_mapping.py`、`build_lists.py` は、UE の外でも実行できます（`python -I apply_mapping.py ...`。Python 3 が必要です）。
 
-詳しい手順と、つまずいた点は、記事（yoshikawastudio.com）にまとめています。調整できる値は `PARAMETERS.md` を見てください。
+詳しい手順と、つまずいた点は、記事「[【UE5.8】MetaHumanのリグでVRoidモデルを動かす方法](https://yoshikawastudio.com/ue58-vroid-metahuman-facedrive/)」にまとめています。調整できる値は `PARAMETERS.md` を見てください。
 
 ## 検証済みの範囲（モデル）
 
