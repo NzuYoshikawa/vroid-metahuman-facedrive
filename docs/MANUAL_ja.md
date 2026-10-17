@@ -278,7 +278,7 @@ UE マネキンの動きを使う場合は、`ue_body_retarget_mannequin.py` を
 5. 画像として書き出す
 
 ```
-UnrealEditor.exe <プロジェクト>.uproject /Game/FaceDrive/Demo_VRoid -game -windowed -ResX=720 -ResY=720 -ForceRes -NoLoadingScreen -NoTextureStreaming -MovieSceneCaptureType=/Script/MovieSceneCapture.AutomatedLevelSequenceCapture -LevelSequence=/Game/FaceDrive/LS_Demo.LS_Demo -MovieFolder=<出力先> -MovieName=vroid -MovieFormat=PNG -MovieFrameRate=30 -NoSplash -unattended
+UnrealEditor.exe <プロジェクト>.uproject /Game/FaceDrive/Demo_VRoid -game -windowed -ResX=1280 -ResY=720 -ForceRes -NoLoadingScreen -NoTextureStreaming -MovieSceneCaptureType=/Script/MovieSceneCapture.AutomatedLevelSequenceCapture -LevelSequence=/Game/FaceDrive/LS_Demo.LS_Demo -MovieFolder=<出力先> -MovieName=vroid -MovieFormat=PNG -MovieFrameRate=30 -NoSplash -unattended
 ```
 
 > `-NoTextureStreaming` を付けないと、書き出しが始まらず、フレームが1枚も出ません。

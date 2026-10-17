@@ -30,7 +30,19 @@ def _fd_finish():
 import unreal
 
 LEVEL = '/Game/FaceDrive/Demo_VRoid'
-unreal.EditorLevelLibrary.new_level(LEVEL)
+# やり直したときのために、同じ名前のレベルが既にあれば、開いて、中のアクターを消してから作り直す
+# （new_level は、既存のレベルがあると失敗する。レベルのアセットを消すのも、参照されていて失敗する）
+if unreal.EditorAssetLibrary.does_asset_exist(LEVEL):
+    unreal.get_editor_subsystem(unreal.LevelEditorSubsystem).load_level(LEVEL)
+    _old = unreal.get_editor_subsystem(unreal.EditorActorSubsystem)
+    for _a in list(_old.get_all_level_actors()):
+        try:
+            _old.destroy_actor(_a)
+        except BaseException:
+            pass
+    print('FD level reused:', LEVEL)
+else:
+    unreal.EditorLevelLibrary.new_level(LEVEL)
 eas = unreal.get_editor_subsystem(unreal.EditorActorSubsystem)
 
 def spawn(cls, loc=(0, 0, 0), rot=(0, 0, 0)):
@@ -43,14 +55,33 @@ actor.set_actor_label('VRoid_Demo')
 
 sun = spawn(unreal.DirectionalLight, (0, 300, 300), (0, -30, -90))
 sun.get_component_by_class(unreal.DirectionalLightComponent).set_editor_property('intensity', 10.0)
-spawn(unreal.SkyLight, (0, 0, 400))
+sky = spawn(unreal.SkyLight, (0, 0, 400))
+# ライトは「可動」にする（固定のままだと、画面に「LIGHTING NEEDS TO BE REBUILT」の赤い警告が出て、書き出しに写る）
+for _l in (sun, sky):
+    try:
+        _l.root_component.set_mobility(unreal.ComponentMobility.MOVABLE)
+    except BaseException as e:
+        print('mobility skip', type(e).__name__)
 
-# 背景: 濃い服が黒い背景に溶けないように、キャラの後ろに、明るい灰色の板を置く
-_bk = None
+# 背景: 濃い服が黒い背景に溶けないように、キャラの後ろに、単色の板を置く。照明の影響を受けない発光の材質にする（ノイズが出ない）
+def _backdrop_material():
+    path = '/Game/FaceDrive/M_Backdrop'
+    if unreal.EditorAssetLibrary.does_asset_exist(path):
+        return unreal.load_asset(path)
+    mat = unreal.AssetToolsHelpers.get_asset_tools().create_asset('M_Backdrop', '/Game/FaceDrive', unreal.Material, unreal.MaterialFactoryNew())
+    lib = unreal.MaterialEditingLibrary
+    col = lib.create_material_expression(mat, unreal.MaterialExpressionConstant3Vector, -400, 0)
+    col.set_editor_property('constant', unreal.LinearColor(0.20, 0.27, 0.36, 1.0))
+    lib.connect_material_property(col, '', unreal.MaterialProperty.MP_EMISSIVE_COLOR)
+    mat.set_editor_property('shading_model', unreal.MaterialShadingModel.MSM_UNLIT)
+    lib.recompile_material(mat)
+    unreal.EditorAssetLibrary.save_asset(path)
+    return mat
+
 try:
     _bk = spawn(unreal.StaticMeshActor, (0, -150, 100), (90, 0, 0))     # 板は +Z を向く。ピッチ 90 度で +Y（カメラ側）に向ける
     _bk.static_mesh_component.set_static_mesh(unreal.load_asset('/Engine/BasicShapes/Plane'))
-    _bk.static_mesh_component.set_material(0, unreal.load_asset('/Engine/EngineMaterials/DefaultMaterial'))
+    _bk.static_mesh_component.set_material(0, _backdrop_material())
     _bk.set_actor_scale3d(unreal.Vector(8, 8, 1))
     _bk.set_actor_label('Backdrop')
 except BaseException as e:
