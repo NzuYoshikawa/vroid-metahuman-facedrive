@@ -9,7 +9,10 @@ try:
 except NameError:
     _HERE = _os.environ.get('FD_ROOT', '.')
 _CFG_PATH = _os.path.join(_HERE, 'config.json')
-_CFG = _json.load(open(_CFG_PATH, encoding='utf-8')) if _os.path.exists(_CFG_PATH) else {}
+try:
+    _CFG = _json.load(open(_CFG_PATH, encoding='utf-8-sig')) if _os.path.exists(_CFG_PATH) else {}
+except ValueError as _e:
+    raise SystemExit('config.json の書き方が正しくありません: %s （パスの区切りは / にするか、\\\\ と2つ重ねます）' % _e)
 
 # --- 共通: エディタのメニューから実行したときに、エディタを閉じない／config.json の "env" を環境変数の既定値にする ---
 for _k, _v in (_CFG.get('env') or {}).items():
@@ -30,7 +33,7 @@ import json, math, os
 import unreal
 
 ROOT = _HERE
-P = json.load(open(os.path.join(ROOT, 'head_params.json'), encoding='utf-8'))
+P = json.load(open(os.path.join(ROOT, 'head_params.json'), encoding='utf-8-sig'))
 SRC = os.environ.get('FD_HEAD_ANIM', '/Game/FaceDrive/AS_VRoid_Demo_Idle_Face')
 OUT = os.environ.get('FD_HEAD_OUT', SRC + '_Head')
 T0 = float(os.environ.get('FD_HEAD_T0', '8.0'))

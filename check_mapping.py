@@ -7,13 +7,16 @@ try:
 except NameError:
     _HERE = _os.environ.get('FD_ROOT', '.')
 _CFG_PATH = _os.path.join(_HERE, 'config.json')
-_CFG = _json.load(open(_CFG_PATH, encoding='utf-8')) if _os.path.exists(_CFG_PATH) else {}
+try:
+    _CFG = _json.load(open(_CFG_PATH, encoding='utf-8-sig')) if _os.path.exists(_CFG_PATH) else {}
+except ValueError as _e:
+    raise SystemExit('config.json の書き方が正しくありません: %s （パスの区切りは / にするか、\\\\ と2つ重ねます）' % _e)
 import json, os, re, sys, fnmatch
 
 here = os.path.dirname(os.path.abspath(__file__))
-mp = json.load(open(sys.argv[1], encoding='utf-8'))
-mh = set(json.load(open(os.path.join(here, 'mh_controls.json'), encoding='utf-8'))['controls'])
-vm = json.load(open(os.path.join(here, 'vrm_morphs.json'), encoding='utf-8'))['morphs']
+mp = json.load(open(sys.argv[1], encoding='utf-8-sig'))
+mh = set(json.load(open(os.path.join(here, 'mh_controls.json'), encoding='utf-8-sig'))['controls'])
+vm = json.load(open(os.path.join(here, 'vrm_morphs.json'), encoding='utf-8-sig'))['morphs']
 
 def curves(expr):
     m = re.fullmatch(r'avg\((.+)\)', expr)

@@ -7,7 +7,10 @@ try:
 except NameError:
     _HERE = _os.environ.get('FD_ROOT', '.')
 _CFG_PATH = _os.path.join(_HERE, 'config.json')
-_CFG = _json.load(open(_CFG_PATH, encoding='utf-8')) if _os.path.exists(_CFG_PATH) else {}
+try:
+    _CFG = _json.load(open(_CFG_PATH, encoding='utf-8-sig')) if _os.path.exists(_CFG_PATH) else {}
+except ValueError as _e:
+    raise SystemExit('config.json の書き方が正しくありません: %s （パスの区切りは / にするか、\\\\ と2つ重ねます）' % _e)
 import json, re, sys
 try:
     if _os.environ.get('FD_NO_NUMPY'):
@@ -27,7 +30,7 @@ mp_path = _p(_a[1] if len(_a) > 1 else 'mapping_v2.json')
 out_path = _p(_a[2] if len(_a) > 2 else 'vrm_curves.json')
 fps = float(_a[3]) if len(_a) > 3 else 30.0
 d = json.load(open(src))
-mp = json.load(open(mp_path, encoding='utf-8'))
+mp = json.load(open(mp_path, encoding='utf-8-sig'))
 n = int(round(d['length'] * fps)) + 1
 t = np.arange(n) / fps
 
@@ -93,7 +96,7 @@ tuning_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'face_tun
 if len(sys.argv) > 5:
     tuning_path = sys.argv[5]
 if os.path.exists(tuning_path):
-    tu = json.load(open(tuning_path, encoding='utf-8'))
+    tu = json.load(open(tuning_path, encoding='utf-8-sig'))
     g_all = float(tu.get('expression_gain', 1.0))
     per = tu.get('morphs', {})
     sm = int(tu.get('smooth_frames', 1))
