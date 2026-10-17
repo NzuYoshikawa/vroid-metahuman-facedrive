@@ -14,8 +14,8 @@ if not exist "%UE_DIR%\Engine\Binaries\Win64\UnrealEditor.exe" (
   pause
   exit /b 1
 )
-echo Starting Unreal Editor. This takes several minutes. Do not close the window.
-"%UE_DIR%\Engine\Binaries\Win64\UnrealEditor.exe" "%PROJECT%" -ExecutePythonScript="%~dp0ue_run_all.py" -unattended -nosplash -NoTextureStreaming -abslog="%~dp0run_all.log"
+echo Starting Unreal Editor (no window is shown). This takes several minutes. Do not close this window.
+"%UE_DIR%\Engine\Binaries\Win64\UnrealEditor.exe" "%PROJECT%" -ExecutePythonScript="%~dp0ue_run_all.py" -nullrhi -unattended -nosplash -NoTextureStreaming -abslog="%~dp0run_all.log"
 echo.
 echo Finished. See run_all_report.json (result of each step) and run_all.log.
 pause
