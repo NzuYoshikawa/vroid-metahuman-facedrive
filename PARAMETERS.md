@@ -34,6 +34,20 @@
 
 - `per_anim` の例: `"per_anim": {"gangnam_style": {"strength": 0.8, "hand_margin_cm": 2.0}}`
 
+## 3b. モデルの大きさへの自動補正
+
+- `body_fix_params.json` の半径・余白（cm）は、**頭の骨の高さ 140 cm のモデルでの値**です。
+- `ue_body_fix.py` が、モデルごとの頭の骨の高さ（基準姿勢）との比（`SCALE`）を掛けて使います。ログの `FD model head height ... scale vs reference model ...` で確認できます。
+- 接地補正（`ue_ground_fix_*.py`）は、モデルの足首の高さと脚の長さを、基準姿勢から実行時に測ります。
+- 確認用レベルのカメラ位置（`ue_make_demo_level.py`）も、同じ比で決まります。
+
+## 3c. config.json の任意項目
+
+| 項目 | 意味 |
+|---|---|
+| `env` | 各スクリプトの環境変数（`FD_HEAD_T0` など）の既定値。エディタのメニューから実行するときに使う |
+| `steps` | `ue_run_all.py` で実行する手順を絞る（例 `["check", "spring"]`） |
+
 ## 4. リターゲット（コードに埋め込み・必要時のみ）
 
 - 「Run IK Rig」は無効（`ue_mixamo_retarget.py`、`ue_body_retarget_mannequin.py`）。有効にすると膝・肘が反転して手足が崩れる。

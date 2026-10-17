@@ -8,6 +8,22 @@ except NameError:
     _HERE = _os.environ.get('FD_ROOT', '.')
 _CFG_PATH = _os.path.join(_HERE, 'config.json')
 _CFG = _json.load(open(_CFG_PATH, encoding='utf-8')) if _os.path.exists(_CFG_PATH) else {}
+
+# --- 共通: エディタのメニューから実行したときに、エディタを閉じない／config.json の "env" を環境変数の既定値にする ---
+for _k, _v in (_CFG.get('env') or {}).items():
+    _os.environ.setdefault(str(_k), str(_v))
+
+def _fd_finish():
+    """コマンドライン（-run=pythonscript）のときだけエディタを終了する。"""
+    if _os.environ.get('FD_NO_QUIT'):       # ue_run_all.py から呼ばれたときは終了しない
+        return
+    try:
+        import unreal as _u
+        _cl = str(_u.SystemLibrary.get_command_line()).lower()
+        if '-run=pythonscript' in _cl or '-executepythonscript' in _cl:
+            _u.SystemLibrary.execute_console_command(None, 'QUIT_EDITOR')
+    except BaseException:
+        pass
 import json, math, os
 import unreal
 
@@ -34,10 +50,16 @@ else:
     VR_NAME = {n: 'VRM_' + n for n in NAMES}
     SRC_B = dict(foot_l='LeftFoot', foot_r='RightFoot', th='LeftUpLeg', ca='LeftLeg')
     IDLE = 'idle'
-HIPS, NECK, HEAD = 'J_Bip_C_Hips', 'J_Bip_C_Neck', 'J_Bip_C_Head'
-UPCH = 'J_Bip_C_UpperChest'
-LEG = {'L': ('J_Bip_L_UpperLeg', 'J_Bip_L_LowerLeg', 'J_Bip_L_Foot'), 'R': ('J_Bip_R_UpperLeg', 'J_Bip_R_LowerLeg', 'J_Bip_R_Foot')}
-ARM = {'L': ('J_Bip_L_UpperArm', 'J_Bip_L_LowerArm', 'J_Bip_L_Hand'), 'R': ('J_Bip_R_UpperArm', 'J_Bip_R_LowerArm', 'J_Bip_R_Hand')}
+import sys as _sys
+_sys.path.insert(0, _HERE)
+import fd_common as _fc
+_B = _fc.bones(_CFG['vroid_dir'] + _CFG['meta'])
+# 骨の名前は、VRM の人型ボーン対応表から引く（VRoid Studio 以外のモデルにも対応）
+HIPS, NECK, HEAD = _B['hips'], _B['neck'], _B['head']
+UPCH = _B['upper_chest']
+LEG = {'L': (_B['l_upper_leg'], _B['l_lower_leg'], _B['l_foot']), 'R': (_B['r_upper_leg'], _B['r_lower_leg'], _B['r_foot'])}
+ARM = {'L': (_B['l_upper_arm'], _B['l_lower_arm'], _B['l_hand']), 'R': (_B['r_upper_arm'], _B['r_lower_arm'], _B['r_hand'])}
+SCALE = 1.0      # モデルの高さ / 検証したモデルの高さ。手を避ける半径と余白（cm）に掛ける（下で設定）
 NEED = [HIPS, NECK, HEAD, UPCH] + [b for v in list(LEG.values()) + list(ARM.values()) for b in v]
 
 opts = unreal.AnimPoseEvaluationOptions()
@@ -140,10 +162,11 @@ def penetration(fr, side):
     el, wr = ARM[side][1], ARM[side][2]
     pts = [fr[wr][0], mul(add(fr[el][0], fr[wr][0]), 0.5)]
     worst = (0.0, None, None)
-    cols = [(fr[HIPS][0], fr[NECK][0], P['torso_radius_cm'] + P['hand_margin_cm'])]
+    m = P['hand_margin_cm'] * SCALE
+    cols = [(fr[HIPS][0], fr[NECK][0], P['torso_radius_cm'] * SCALE + m)]
     for s in ('L', 'R'):
-        cols.append((fr[LEG[s][0]][0], fr[LEG[s][1]][0], P['thigh_radius_cm'] + P['hand_margin_cm']))
-    cols.append((fr[HEAD][0], add(fr[HEAD][0], (0, 0, 8.0)), P['head_radius_cm'] + P['hand_margin_cm']))
+        cols.append((fr[LEG[s][0]][0], fr[LEG[s][1]][0], P['thigh_radius_cm'] * SCALE + m))
+    cols.append((fr[HEAD][0], add(fr[HEAD][0], (0, 0, 8.0 * SCALE)), P['head_radius_cm'] * SCALE + m))
     for k, p in enumerate(pts):
         for (a, b, r) in cols:
             c = seg_closest(p, a, b)
@@ -187,12 +210,14 @@ parent_hips = str(unreal.get_editor_subsystem(unreal.SkeletalMeshEditorSubsystem
 parent_of = {}
 sk = unreal.get_editor_subsystem(unreal.SkeletalMeshEditorSubsystem)
 mesh = unreal.load_asset((_CFG['vroid_dir'] + _CFG['mesh']))
+SCALE = _fc.model_scale(mesh, (_CFG['vroid_dir'] + _CFG['face_pose_anim']), HEAD)
+print('FD model head height %.1f cm  scale vs reference model %.3f' % (_fc.model_height_cm(mesh, (_CFG['vroid_dir'] + _CFG['face_pose_anim']), HEAD), SCALE))
 for side in ('L', 'R'):
     for b in LEG[side][:1] + ARM[side][:1]:
         parent_of[b] = str(sk.get_bone_parent(mesh, b))
 print('parents', parent_of)
 
-report = {'set': SET, 'DZ0': DZ0, 'params': P, 'anims': {}}
+report = {'set': SET, 'DZ0': DZ0, 'model_scale': SCALE, 'params': P, 'anims': {}}
 P_BASE = dict(P)
 for name in NAMES:
     # 動きごとの個別設定（body_fix_params.json の "per_anim": {"gangnam_style": {"strength": 0.8}}）
@@ -309,4 +334,4 @@ for name in NAMES:
     print('FIX %s sink %.2f -> %.2f cm | hand penetration %.2f -> %.2f cm (frames %d -> %d of %d)' %
           (name, max(sink_before, 0), max(sink_after, 0), max(pen_before, 0), max(pen_after, 0), pen_frames_before, pen_frames_after, len(ts)))
 json.dump(report, open(os.path.join(ROOT, 'body_fix_report_%s.json' % SET), 'w'), indent=1)
-unreal.SystemLibrary.execute_console_command(None, 'QUIT_EDITOR')
+_fd_finish()

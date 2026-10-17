@@ -17,6 +17,22 @@ except NameError:
     _HERE = _os.environ.get('FD_ROOT', '.')
 _CFG_PATH = _os.path.join(_HERE, 'config.json')
 _CFG = _json.load(open(_CFG_PATH, encoding='utf-8')) if _os.path.exists(_CFG_PATH) else {}
+
+# --- 共通: エディタのメニューから実行したときに、エディタを閉じない／config.json の "env" を環境変数の既定値にする ---
+for _k, _v in (_CFG.get('env') or {}).items():
+    _os.environ.setdefault(str(_k), str(_v))
+
+def _fd_finish():
+    """コマンドライン（-run=pythonscript）のときだけエディタを終了する。"""
+    if _os.environ.get('FD_NO_QUIT'):       # ue_run_all.py から呼ばれたときは終了しない
+        return
+    try:
+        import unreal as _u
+        _cl = str(_u.SystemLibrary.get_command_line()).lower()
+        if '-run=pythonscript' in _cl or '-executepythonscript' in _cl:
+            _u.SystemLibrary.execute_console_command(None, 'QUIT_EDITOR')
+    except BaseException:
+        pass
 import json, os
 import unreal
 
@@ -132,4 +148,4 @@ for g, v in vals.items():
     print('SPRING group=%s n=%d  stiffness(mean)=%.3f drag(mean)=%.3f hit_radius(mean)=%.4f' %
           (g, len(v), sum(x[0] for x in v) / len(v), sum(x[1] for x in v) / len(v), sum(x[2] for x in v) / len(v)))
 print('overrides used:', ov_used, ' colliders scaled:', col_used)
-unreal.SystemLibrary.execute_console_command(None, 'QUIT_EDITOR')
+_fd_finish()

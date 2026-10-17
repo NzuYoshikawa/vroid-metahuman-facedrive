@@ -10,6 +10,22 @@ except NameError:
     _HERE = _os.environ.get('FD_ROOT', '.')
 _CFG_PATH = _os.path.join(_HERE, 'config.json')
 _CFG = _json.load(open(_CFG_PATH, encoding='utf-8')) if _os.path.exists(_CFG_PATH) else {}
+
+# --- 共通: エディタのメニューから実行したときに、エディタを閉じない／config.json の "env" を環境変数の既定値にする ---
+for _k, _v in (_CFG.get('env') or {}).items():
+    _os.environ.setdefault(str(_k), str(_v))
+
+def _fd_finish():
+    """コマンドライン（-run=pythonscript）のときだけエディタを終了する。"""
+    if _os.environ.get('FD_NO_QUIT'):       # ue_run_all.py から呼ばれたときは終了しない
+        return
+    try:
+        import unreal as _u
+        _cl = str(_u.SystemLibrary.get_command_line()).lower()
+        if '-run=pythonscript' in _cl or '-executepythonscript' in _cl:
+            _u.SystemLibrary.execute_console_command(None, 'QUIT_EDITOR')
+    except BaseException:
+        pass
 import json, math, os
 import unreal
 
@@ -19,7 +35,11 @@ SRC = os.environ.get('FD_HEAD_ANIM', '/Game/FaceDrive/AS_VRoid_Demo_Idle_Face')
 OUT = os.environ.get('FD_HEAD_OUT', SRC + '_Head')
 T0 = float(os.environ.get('FD_HEAD_T0', '8.0'))
 MH = json.load(open(os.environ.get('FD_MH_CURVES', os.path.join(ROOT, 'mh_curves.json'))))['curves']
-HEAD, NECK = 'J_Bip_C_Head', 'J_Bip_C_Neck'
+import sys as _sys
+_sys.path.insert(0, _HERE)
+import fd_common as _fc
+_B = _fc.bones(_CFG['vroid_dir'] + _CFG['meta'])
+HEAD, NECK = _B['head'], _B['neck']
 
 opts = unreal.AnimPoseEvaluationOptions()
 opts.set_editor_property('evaluation_type', unreal.AnimDataEvalType.RAW)
@@ -84,8 +104,8 @@ ts = [length * i / n for i in range(n + 1)]
 # キャラの前方・左方向（0フレーム目の姿勢から）
 p0 = pose(anim, 0.0)
 tp = lambda b: (lambda v: (v.x, v.y, v.z))(wt(p0, b).translation)
-f = sub(tp('J_Bip_L_ToeBase'), tp('J_Bip_L_Foot')); f = unit((f[0], f[1], 0.0))
-l = sub(tp('J_Bip_L_UpperArm'), tp('J_Bip_R_UpperArm')); l = (l[0], l[1], 0.0)
+f = sub(tp(_B['l_toes']), tp(_B['l_foot'])); f = unit((f[0], f[1], 0.0))
+l = sub(tp(_B['l_upper_arm']), tp(_B['r_upper_arm'])); l = (l[0], l[1], 0.0)
 l = unit(sub(l, tuple(c * dot(l, f) for c in f)))
 up = (0.0, 0.0, 1.0)
 axis_turn = unit(cross(f, l))                       # fをlへ回す軸（左向き）
@@ -103,10 +123,9 @@ head_tr, neck_tr = [], []
 eye_before, eye_after = [], []
 log_n = []
 eye_bone = None
-for b in unreal.AnimPoseExtensions.get_bone_names(p0):
-    if 'FaceEye' in str(b) and '_L_' in str(b):
-        eye_bone = str(b)
-        break
+_names = [str(b) for b in unreal.AnimPoseExtensions.get_bone_names(p0)]
+if _B['l_eye'] in _names:
+    eye_bone = _B['l_eye']
 for i, t in enumerate(ts):
     nod = max(-mx, min(mx, P['nod_sign'] * P['nod_gain'] * curve(P['mh_nod_curve'], T0 + t)))
     turn = max(-mx, min(mx, P['turn_sign'] * P['turn_gain'] * curve(P['mh_turn_curve'], T0 + t)))
@@ -175,4 +194,4 @@ if eye_bone:
         hd = wt(pz, HEAD).translation
         d = (e1.x - hd.x - ex, e1.y - hd.y - ey, e1.z - hd.z - ez)
         print('VERIFY t=%.2f nod=%+.1f turn=%+.1f | eye move: left=%+.2f cm down=%+.2f cm' % (t, nod, turn, dot(d, l), -dot(d, up)))
-unreal.SystemLibrary.execute_console_command(None, 'QUIT_EDITOR')
+_fd_finish()

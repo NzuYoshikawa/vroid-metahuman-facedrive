@@ -8,6 +8,22 @@ except NameError:
     _HERE = _os.environ.get('FD_ROOT', '.')
 _CFG_PATH = _os.path.join(_HERE, 'config.json')
 _CFG = _json.load(open(_CFG_PATH, encoding='utf-8')) if _os.path.exists(_CFG_PATH) else {}
+
+# --- 共通: エディタのメニューから実行したときに、エディタを閉じない／config.json の "env" を環境変数の既定値にする ---
+for _k, _v in (_CFG.get('env') or {}).items():
+    _os.environ.setdefault(str(_k), str(_v))
+
+def _fd_finish():
+    """コマンドライン（-run=pythonscript）のときだけエディタを終了する。"""
+    if _os.environ.get('FD_NO_QUIT'):       # ue_run_all.py から呼ばれたときは終了しない
+        return
+    try:
+        import unreal as _u
+        _cl = str(_u.SystemLibrary.get_command_line()).lower()
+        if '-run=pythonscript' in _cl or '-executepythonscript' in _cl:
+            _u.SystemLibrary.execute_console_command(None, 'QUIT_EDITOR')
+    except BaseException:
+        pass
 import unreal
 
 LEVEL = '/Game/FaceDrive/Demo_VRoid'
@@ -17,15 +33,22 @@ eas = unreal.get_editor_subsystem(unreal.EditorActorSubsystem)
 def spawn(cls, loc=(0, 0, 0), rot=(0, 0, 0)):
     return eas.spawn_actor_from_class(cls, unreal.Vector(*loc), unreal.Rotator(*rot))
 
+_mesh = unreal.load_asset((_CFG['vroid_dir'] + _CFG['mesh']))
 actor = spawn(unreal.SkeletalMeshActor)
-actor.skeletal_mesh_component.set_skeletal_mesh_asset(unreal.load_asset((_CFG['vroid_dir'] + _CFG['mesh'])))
+actor.skeletal_mesh_component.set_skeletal_mesh_asset(_mesh)
 actor.set_actor_label('VRoid_Demo')
 
 sun = spawn(unreal.DirectionalLight, (0, 300, 300), (0, -30, -90))
 sun.get_component_by_class(unreal.DirectionalLightComponent).set_editor_property('intensity', 10.0)
 spawn(unreal.SkyLight, (0, 0, 400))
 
-cam = spawn(unreal.CineCameraActor, (0, 140, 148), (0, 0, -90))
+# カメラの位置は、モデルの高さに合わせる（検証したモデルの高さ 162 cm で、前 140 cm・高さ 148 cm）
+import sys as _sys
+_sys.path.insert(0, _HERE)
+import fd_common as _fc
+_S = _fc.model_scale(_mesh, (_CFG['vroid_dir'] + _CFG['face_pose_anim']), _fc.bones(_CFG['vroid_dir'] + _CFG['meta'])['head'])
+print('FD camera scale', round(_S, 3))
+cam = spawn(unreal.CineCameraActor, (0, 140 * _S, 148 * _S), (0, 0, -90))
 cam.set_actor_label('Cam_Front')
 cc = cam.get_cine_camera_component()
 cc.set_editor_property('current_focal_length', 55.0)
@@ -38,4 +61,4 @@ except BaseException as e:
 
 unreal.EditorLoadingAndSavingUtils.save_current_level()
 print('level saved', LEVEL)
-unreal.SystemLibrary.execute_console_command(None, 'QUIT_EDITOR')
+_fd_finish()

@@ -8,6 +8,22 @@ except NameError:
     _HERE = _os.environ.get('FD_ROOT', '.')
 _CFG_PATH = _os.path.join(_HERE, 'config.json')
 _CFG = _json.load(open(_CFG_PATH, encoding='utf-8')) if _os.path.exists(_CFG_PATH) else {}
+
+# --- 共通: エディタのメニューから実行したときに、エディタを閉じない／config.json の "env" を環境変数の既定値にする ---
+for _k, _v in (_CFG.get('env') or {}).items():
+    _os.environ.setdefault(str(_k), str(_v))
+
+def _fd_finish():
+    """コマンドライン（-run=pythonscript）のときだけエディタを終了する。"""
+    if _os.environ.get('FD_NO_QUIT'):       # ue_run_all.py から呼ばれたときは終了しない
+        return
+    try:
+        import unreal as _u
+        _cl = str(_u.SystemLibrary.get_command_line()).lower()
+        if '-run=pythonscript' in _cl or '-executepythonscript' in _cl:
+            _u.SystemLibrary.execute_console_command(None, 'QUIT_EDITOR')
+    except BaseException:
+        pass
 import json, os
 import unreal
 
@@ -20,7 +36,11 @@ SRC_PATH = {'Idle': M + 'MM_Idle', 'Walk': M + 'Walk/MF_Unarmed_Walk_Fwd', 'Jog'
 VR_NAME = {'Idle': 'VRM_MM_Idle', 'Walk': 'VRM_MF_Unarmed_Walk_Fwd', 'Jog': 'VRM_MF_Unarmed_Jog_Fwd',
            'Attack': 'VRM_MM_Attack_01', 'Charged': 'VRM_MM_ChargedAttack'}
 SRC_B = dict(hips='pelvis', foot_l='foot_l', foot_r='foot_r', th='thigh_l', ca='calf_l')
-DST_B = dict(hips='J_Bip_C_Hips', foot_l='J_Bip_L_Foot', foot_r='J_Bip_R_Foot', th='J_Bip_L_UpperLeg', ca='J_Bip_L_LowerLeg')
+import sys as _sys
+_sys.path.insert(0, _HERE)
+import fd_common as _fc
+_B = _fc.bones(_CFG['vroid_dir'] + _CFG['meta'])
+DST_B = dict(hips=_B['hips'], foot_l=_B['l_foot'], foot_r=_B['r_foot'], th=_B['l_upper_leg'], ca=_B['l_lower_leg'])
 
 opts = unreal.AnimPoseEvaluationOptions()
 opts.set_editor_property('evaluation_type', unreal.AnimDataEvalType.RAW)
@@ -134,4 +154,4 @@ for name in P['anims']:
                              'max_lift_cm': max(dz), 'mean_lift_cm': sum(dz) / len(dz)}
     print('GROUND', name, 'sink before=%.2f after=%.2f  lift max=%.2f mean=%.2f cm' % (sink_before, sink_after, max(dz), sum(dz) / len(dz)))
 json.dump(report, open(os.path.join(ROOT, 'ground_report.json'), 'w'), indent=1)
-unreal.SystemLibrary.execute_console_command(None, 'QUIT_EDITOR')
+_fd_finish()

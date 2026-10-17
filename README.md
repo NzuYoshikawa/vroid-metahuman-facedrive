@@ -14,13 +14,15 @@ and tune hair/skirt spring bones, foot sinking and hand penetration through JSON
 
 | 区分 | ファイル | 内容 |
 |---|---|---|
-| 顔 | `ue_export_face_curves.py`, `apply_mapping.py`, `mapping_v2.json`, `face_tuning.json` | Performance → 顔カーブの書き出し → VRoid 標準表情（`Fcl_*`）へ変換、表情ごとの利得 |
+| 顔 | `ue_export_face_curves.py`, `apply_mapping.py`（numpy があれば使い、無ければ `fd_mini_np.py`）, `mapping_v2.json`, `face_tuning.json` | Performance → 顔カーブの書き出し → VRoid 標準表情（`Fcl_*`）へ変換、表情ごとの利得 |
 | 顔 | `ue_bake_vrm_anim.py`, `ue_head_rotation.py`, `head_params.json` | VRoid 用 AnimSequence へのベイク、頭の回転を首・頭の骨へ |
 | 揺れ | `ue_spring_params.py`, `spring_params.json` | 髪・服の揺れやすさ、当たり半径、コライダー（VRM のスプリングボーンの値を倍率で調整） |
 | 体 | `ue_body_retarget_mannequin.py`, `ue_mixamo_import.py`, `ue_mixamo_anims.py`, `ue_mixamo_retarget.py` | UE マネキン／Mixamo の動きを VRoid へ |
 | 体 | `ue_ground_fix_*.py`, `ue_body_fix.py`, `ground_params.json`, `body_fix_params.json` | 足の沈み（脚 IK）・手の貫通（押し出し）の補正 |
 | 確認 | `ue_make_demo_level.py`, `ue_make_sequence.py`, `ue_make_demo_anim.py`, `bl_render_preview.py`, `make_side_by_side.py`, `analyze_limbs.py` | 再生用シーケンス、確認用の描画、手足の崩れの診断 |
-| 実行 | `run_pipeline.ps1`, `apply_params.ps1` | 一括実行、パラメーターの反映 |
+| 取り込み・確認 | `ue_import_vrm.py`, `ue_check_model.py`, `fd_common.py` | VRM をダイアログなしで取り込む、モデルが扱える形かの事前チェック、モデルごとの違い（骨の名前・身長）を吸収する共通部分 |
+| 実行 | `ue_run_all.py`, `run_all.bat`, `check_model.bat`, `settings.bat` | 全手順を UE のエディタの中で順に実行する（PowerShell 不要。`.bat` をダブルクリック） |
+| 実行 | `run_pipeline.ps1`, `apply_params.ps1` | （PowerShell を使う場合）一括実行、パラメーターの反映 |
 | 文書 | `PARAMETERS.md` | 調整できる値の一覧 |
 
 ## 含まれないもの
@@ -36,21 +38,56 @@ and tune hair/skirt spring bones, foot sinking and hand penetration through JSON
 - UE 5.7 は、スクリプトを書くときに互換を意識していますが、実機では未確認です。
 - VRoid Studio 標準の `Fcl_*` 表情を持つモデルで確認しています（ARKit 名の表情を持つモデルは、VRM4U 自身の機能で足ります）。
 
-## 使い方（概要）
+## 使い方（PowerShell を使わない方法）
 
-1. `config.example.json` を `config.json` にコピーし、プロジェクトの名前を書く（VRM4U が取り込み時に付ける名前、Performance のパス）。
-2. UE で VRM を取り込む（Content Browser へドロップ。コマンドラインの自動実行では、ダイアログが出て中断します）。
-3. MetaHuman Animator で Identity と Performance を作り、Process まで実行する。
-4. 顔: `ue_export_face_curves.py` → `apply_mapping.py` → `ue_bake_vrm_anim.py` → `ue_head_rotation.py`
-5. 揺れ・体: `ue_spring_params.py`、`ue_mixamo_*.py`、`ue_ground_fix_*.py`、`ue_body_fix.py`
+1. このリポジトリの ZIP をダウンロードして、`C:\FaceDrive\` などの、パスに日本語と空白を含まない場所に展開する（Code ボタン → Download ZIP）。
+2. `config.example.json` を `config.json` にコピーして、メモ帳で次を書く。
+   - `"vrm"`: 取り込む VRM ファイルのパス
+   - `"vroid_dir"`: 取り込み先（例 `"/Game/Model/"`）
+   - `"mixamo_dir"`: Mixamo の FBX を置いたフォルダ（任意。`T-Pose.fbx` と動きの FBX）
+   - `"performance"`: MetaHuman の Performance アセットのパス（任意。`mh_curves.json` が無いとき、顔カーブを書き出す）
+3. `settings.bat` を、メモ帳で開き、UE のフォルダと、プロジェクトの `.uproject` のパスを書く。
+4. `run_all.bat` をダブルクリックする。UE のエディタが開き、全手順を順に実行して、閉じる。
+5. 各手順の結果は、`run_all_report.json` と `run_all.log` に出る。
 
-UE のスクリプトは、次の形で実行します。
+エディタを自分で開いて実行する場合は、メニューの **Tools ＞ Execute Python Script...** で `ue_run_all.py` を選ぶ（手順 4 の代わり）。
+1つの手順だけを実行する場合は、同じメニューで、その手順のスクリプトを選ぶ。
+
+特定の手順だけを実行するには、`config.json` に `"steps": ["check", "spring"]` のように書く。
+手順の名前は、`import`、`check`、`export_face`、`mapping`、`bake`、`head`、`spring`、`mx_import`、`mx_anims`、`mx_retarget`、`mx_ground`、`mx_bodyfix`、`mq_retarget`、`mq_ground`、`mq_bodyfix`、`demo_anim`、`level`、`sequence` です。
+条件が合わない手順（Mixamo のフォルダが無い、など）は、自動で飛ばします。
+
+### コマンドで実行する場合
+
+UE のスクリプトは、次の形で実行します（VRM の取り込み `ue_import_vrm.py` だけは、画面部品が要るため、`UnrealEditor.exe <プロジェクト>.uproject -ExecutePythonScript="<スクリプト>"` で実行します）。
 
 ```
 UnrealEditor-Cmd.exe <プロジェクト>.uproject -run=pythonscript -script="<スクリプト>" -unattended -nosplash -stdout -FullStdOutLogOutput
 ```
 
+`apply_mapping.py`、`check_mapping.py`、`build_lists.py` は、UE の外でも実行できます（`python -I apply_mapping.py ...`。Python 3 が必要です）。
+
 詳しい手順と、つまずいた点は、記事（yoshikawastudio.com）にまとめています。調整できる値は `PARAMETERS.md` を見てください。
+
+## 検証済みの範囲（モデル）
+
+次の4種類のモデルで、全手順（取り込み、顔、頭、揺れ、Mixamo、UE マネキン、接地・手足の補正、描画の書き出し）を、新規プロジェクトで通しました。
+
+| モデル | 頭の骨の高さ | 揺れ物（房数／関節数） | 結果 |
+|---|---|---|---|
+| `v4u_1130`（最初に作った基準） | 140 cm | 32／112 | 全手順 完了 |
+| `test1130`（同じ VRoid Studio の標準体型） | 142 cm | 22／82 | 全手順 完了 |
+| `test251128`（同上） | 143 cm | 21／82 | 全手順 完了 |
+| `v4u_1130` を 0.8 倍に取り込み（背が低い） | 112 cm | 32／112 | 全手順 完了 |
+| `v4u_1130` を 1.25 倍に取り込み（背が高い） | 175 cm | 32／112 | 全手順 完了 |
+
+- 足の沈みは、どのモデル・どの動きでも、補正後 0.0〜0.3 cm でした（補正前は最大 11.9 cm）。
+- 手の貫通は、補正前 最大 10.8 cm が、補正後 最大 2.6 cm になりました（ダンスの一部で残ります）。
+- 頭の回転、表情、髪の揺れが、全モデルの書き出し（155フレーム）で見えることを確認しました。
+
+**未検証:** VRoid Studio 以外で作った VRM（骨の名前が違うモデル）、人型でない体型、スカート・髪の無いモデルの揺れの調整。
+骨の名前は、VRM の人型ボーン対応表から引く作りにしてありますが、実機では VRoid Studio 製のモデルでしか試していません。
+モデルを取り込んだら、まず `check_model.bat`（または `ue_check_model.py`）で、事前チェックを実行してください。
 
 ## 再現確認について
 

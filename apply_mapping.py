@@ -9,10 +9,23 @@ except NameError:
 _CFG_PATH = _os.path.join(_HERE, 'config.json')
 _CFG = _json.load(open(_CFG_PATH, encoding='utf-8')) if _os.path.exists(_CFG_PATH) else {}
 import json, re, sys
-import numpy as np
+try:
+    if _os.environ.get('FD_NO_NUMPY'):
+        raise ImportError
+    import numpy as np
+except ImportError:      # UE のエディタ内の Python など、numpy が無い環境
+    import sys as _sys
+    _sys.path.insert(0, _HERE)
+    import fd_mini_np as np
 
-src, mp_path, out_path = sys.argv[1:4]
-fps = float(sys.argv[4]) if len(sys.argv) > 4 else 30.0
+# 引数なし（エディタのメニューから実行）なら、このフォルダの既定のファイルを使う
+_a = sys.argv[1:] if len(sys.argv) > 1 else []
+def _p(x):
+    return x if _os.path.isabs(x) else _os.path.join(_HERE, x)
+src = _p(_a[0] if len(_a) > 0 else 'mh_curves.json')
+mp_path = _p(_a[1] if len(_a) > 1 else 'mapping_v2.json')
+out_path = _p(_a[2] if len(_a) > 2 else 'vrm_curves.json')
+fps = float(_a[3]) if len(_a) > 3 else 30.0
 d = json.load(open(src))
 mp = json.load(open(mp_path, encoding='utf-8'))
 n = int(round(d['length'] * fps)) + 1

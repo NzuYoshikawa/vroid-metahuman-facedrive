@@ -7,6 +7,22 @@ except NameError:
     _HERE = _os.environ.get('FD_ROOT', '.')
 _CFG_PATH = _os.path.join(_HERE, 'config.json')
 _CFG = _json.load(open(_CFG_PATH, encoding='utf-8')) if _os.path.exists(_CFG_PATH) else {}
+
+# --- 共通: エディタのメニューから実行したときに、エディタを閉じない／config.json の "env" を環境変数の既定値にする ---
+for _k, _v in (_CFG.get('env') or {}).items():
+    _os.environ.setdefault(str(_k), str(_v))
+
+def _fd_finish():
+    """コマンドライン（-run=pythonscript）のときだけエディタを終了する。"""
+    if _os.environ.get('FD_NO_QUIT'):       # ue_run_all.py から呼ばれたときは終了しない
+        return
+    try:
+        import unreal as _u
+        _cl = str(_u.SystemLibrary.get_command_line()).lower()
+        if '-run=pythonscript' in _cl or '-executepythonscript' in _cl:
+            _u.SystemLibrary.execute_console_command(None, 'QUIT_EDITOR')
+    except BaseException:
+        pass
 import json, os
 import unreal
 
@@ -68,7 +84,7 @@ dst_mesh = unreal.load_asset(D + _CFG['mesh'])
 # 複製して Run IK Rig を無効にしたリターゲッタを使う。
 RTG_NOIK = '/Game/FaceDrive/RTG_Mannequin_to_VRoid'
 if not unreal.EditorAssetLibrary.does_asset_exist(RTG_NOIK):
-    if unreal.EditorAssetLibrary.does_asset_exist(D + _CFG['retargeter']):
+    if _CFG.get('retargeter') and unreal.EditorAssetLibrary.does_asset_exist(D + _CFG['retargeter']):
         unreal.EditorAssetLibrary.duplicate_asset(D + _CFG['retargeter'], RTG_NOIK)
     else:
         # VRM4U が RTG を作っていない取り込みでは、マネキンの IK Rig とリターゲッタを自前で作る
@@ -166,4 +182,4 @@ for label, p in srcs:
             print('DUMP', label, tag, 'bones=%d frames=%d len=%.2f' % (len(d['bones']), len(d['frames']), d['length']))
         except BaseException as e:
             print('DUMP FAIL', label, tag, type(e).__name__, str(e)[:200])
-unreal.SystemLibrary.execute_console_command(None, 'QUIT_EDITOR')
+_fd_finish()
